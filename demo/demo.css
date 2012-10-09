@@ -1,0 +1,7 @@
+html, body { height: 100% }
+body { background: #180315; margin: 0 }
+
+#arcade-display {
+  height: 100%;
+  width: 100%;
+}
