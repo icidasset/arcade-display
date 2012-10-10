@@ -66,7 +66,7 @@ root.ArcadeDisplay = (function() {
     this.setup_canvas();
 
     // frame rate
-    frame_rate = options.frame_rate || 24;
+    frame_rate = options.frame_rate || 1.5;
     this.state.delay = 1000 * (1 / frame_rate);
 
     // render if needed
@@ -159,8 +159,8 @@ root.ArcadeDisplay = (function() {
       return false;
 
     } else if (!color) {
-      this.draw_led(this.context, position, this.options.default_color);
-      // this.draw_stled(this.context, position); // <-- used to do this, but seems to use more cpu
+      // this.draw_led(this.context, position, this.options.default_color);
+      this.draw_stled(this.context, position);
 
     } else {
       this.draw_led(this.context, position, color);
@@ -272,7 +272,15 @@ root.ArcadeDisplay = (function() {
    *  Animation loop
    */
   AD.prototype.anim_loop = function() {
-    var led_array = this.animation_array[this.state.current_anim_idx];
+    var self = this, led_array;
+
+    // request animation frame with "frame rate"
+    this.state.timeout_id = setTimeout(function() {
+      self.state.raf_timeout_id = requestAnimationFrame(self.anim_loop);
+    }, this.state.delay);
+
+    // set led array
+    led_array = this.animation_array[this.state.current_anim_idx];
 
     // render
     this.render(true, led_array);
@@ -282,9 +290,6 @@ root.ArcadeDisplay = (function() {
       if (this.state.current_anim_idx < this.animation_array.length - 1) ++this.state.current_anim_idx;
       else this.state.current_anim_idx = 0;
     }
-
-    // set timeout
-    this.state.timeout_id = setTimeout(this.anim_loop, this.state.delay);
   },
 
 
@@ -305,7 +310,9 @@ root.ArcadeDisplay = (function() {
 
   AD.prototype.stop = function() {
     clearTimeout(this.state.timeout_id);
+    cancelAnimationFrame(this.state.raf_timeout_id);
     this.state.timeout_id = null;
+    this.state.raf_timeout_id = null;
   };
 
 
@@ -313,11 +320,6 @@ root.ArcadeDisplay = (function() {
   /**************************************
    *  Utility functions
    */
-  AD.prototype.bind_to_self = function(fn_name) {
-    this[fn_name] = __bind(this[fn_name], this);
-  };
-
-
   AD.prototype.get_actual_position = function(x, y) {
     var half_of_the_horizontal_amount = Math.floor(this.state.amount_of_leds.horizontal / 2),
         half_of_the_vertical_amount   = Math.floor(this.state.amount_of_leds.vertical / 2);
@@ -356,6 +358,40 @@ root.ArcadeDisplay = (function() {
 
     }
   };
+
+
+  AD.prototype.bind_to_self = function(fn_name) {
+    this[fn_name] = __bind(this[fn_name], this);
+  };
+
+
+  // requestAnimationFrame polyfill by Erik Möller
+  // fixes from Paul Irish and Tino Zijdel
+  (function() {
+    var lastTime = 0;
+    var vendors = ["ms", "moz", "webkit", "o"];
+    for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+      window.requestAnimationFrame = window[vendors[x]+"RequestAnimationFrame"];
+      window.cancelAnimationFrame = window[vendors[x]+"CancelAnimationFrame"]
+                                 || window[vendors[x]+"CancelRequestAnimationFrame"];
+    }
+
+    if (!window.requestAnimationFrame)
+      window.requestAnimationFrame = function(callback, element) {
+        var currTime = new Date().getTime();
+        var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+        var id = window.setTimeout(function() {
+          callback(currTime + timeToCall);
+        }, timeToCall);
+        lastTime = currTime + timeToCall;
+        return id;
+      };
+
+    if (!window.cancelAnimationFrame)
+      window.cancelAnimationFrame = function(id) {
+        clearTimeout(id);
+      };
+  }());
 
 
 
