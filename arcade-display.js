@@ -39,11 +39,11 @@ root.ArcadeDisplay = (function() {
   /**************************************
    *  Constructor
    */
-  function AD(element, options) {
+  function AD(canvas, options) {
     var frame_rate;
 
     // check
-    if (!element) {
+    if (!canvas) {
       console.error("The canvas element is missing or invalid");
       return;
     }
@@ -79,10 +79,10 @@ root.ArcadeDisplay = (function() {
    *  Setup canvas
    */
   AD.prototype.setup_canvas = function() {
-    this.context = canvas.getContext("2d");
+    this.context = this.canvas.getContext("2d");
 
-    canvas.height = canvas.offsetHeight;
-    canvas.width  = canvas.offsetWidth;
+    this.canvas.height = this.canvas.offsetHeight;
+    this.canvas.width  = this.canvas.offsetWidth;
 
     this.setup_leds(true);
   };
