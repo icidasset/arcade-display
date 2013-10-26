@@ -66,7 +66,7 @@ window.ArcadeDisplay = (function() {
     this.setup_canvas();
 
     // frame rate
-    frame_rate = options.frame_rate || 1.5;
+    frame_rate = this.settings.frame_rate || 1.5;
     this.state.delay = 1000 * (1 / frame_rate);
 
     // render if needed
@@ -97,8 +97,8 @@ window.ArcadeDisplay = (function() {
 
     // amount of leds
     amount_of_leds = {
-      horizontal  : Math.ceil(this.canvas.width  / this.options.led_width),
-      vertical    : Math.ceil(this.canvas.height / this.options.led_height)
+      horizontal  : Math.ceil(this.canvas.width  / this.settings.led_width),
+      vertical    : Math.ceil(this.canvas.height / this.settings.led_height)
     };
 
     // check if the amount is even
@@ -111,17 +111,17 @@ window.ArcadeDisplay = (function() {
     v = amount_of_leds.vertical;
 
     // determine margins (on the outside)
-    this.margin_x = Math.floor((this.canvas.width - (h * this.options.led_width)) / 2),
-    this.margin_y = Math.floor((this.canvas.height - (v * this.options.led_height)) / 2);
+    this.margin_x = Math.floor((this.canvas.width - (h * this.settings.led_width)) / 2),
+    this.margin_y = Math.floor((this.canvas.height - (v * this.settings.led_height)) / 2);
 
     // this object
     this.state.amount_of_leds = amount_of_leds;
 
     // cache switched off led
     var stled    = document.createElement("canvas");
-    stled.width  = this.options.led_width;
-    stled.height = this.options.led_height;
-    this.draw_led(stled.getContext("2d"), { x: 0, y: 0 }, this.options.default_color);
+    stled.width  = this.settings.led_width;
+    stled.height = this.settings.led_height;
+    this.draw_led(stled.getContext("2d"), { x: 0, y: 0 }, this.settings.default_color);
     this.stled   = stled;
 
     // draw them
@@ -159,7 +159,7 @@ window.ArcadeDisplay = (function() {
       return false;
 
     } else if (!color) {
-      // this.draw_led(this.context, position, this.options.default_color);
+      // this.draw_led(this.context, position, this.settings.default_color);
       this.draw_stled(this.context, position);
 
     } else {
@@ -174,7 +174,7 @@ window.ArcadeDisplay = (function() {
    *  Draw LED
    */
   AD.prototype.draw_led = function(c, position, color) {
-    if (this.options.squares) {
+    if (this.settings.squares) {
       this.draw_led_square(c, position, color);
 
     } else {
@@ -189,15 +189,15 @@ window.ArcadeDisplay = (function() {
     var width, height, x, y, radius;
 
     // set
-    width  = this.options.led_width;
-    height = this.options.led_height;
+    width  = this.settings.led_width;
+    height = this.settings.led_height;
 
     x      = position.x + width / 2;
     y      = position.y + height / 2;
     radius = width / 2 - .45;
 
     // led glow
-    if (color !== this.options.default_color) {
+    if (color !== this.settings.default_color) {
       var radial_gradient = c.createRadialGradient(x, y, 0, x, y, radius * 5);
       radial_gradient.addColorStop(0, this.hex_to_rgb(color, .0275));
       radial_gradient.addColorStop(1, this.hex_to_rgb(color, 0));
@@ -223,8 +223,8 @@ window.ArcadeDisplay = (function() {
     var width, height, x, y;
 
     // set
-    width  = this.options.led_width - .5;
-    height = this.options.led_height - .5;
+    width  = this.settings.led_width - .5;
+    height = this.settings.led_height - .5;
 
     x = position.x;
     y = position.y;
@@ -333,8 +333,8 @@ window.ArcadeDisplay = (function() {
       return false;
 
     } else {
-      var real_x = this.margin_x + (half_of_the_horizontal_amount + x) * this.options.led_width,
-          real_y = this.margin_y + (half_of_the_vertical_amount - y) * this.options.led_height;
+      var real_x = this.margin_x + (half_of_the_horizontal_amount + x) * this.settings.led_width,
+          real_y = this.margin_y + (half_of_the_vertical_amount - y) * this.settings.led_height;
 
       return { x: real_x, y: real_y };
 
