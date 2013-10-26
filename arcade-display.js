@@ -1,11 +1,11 @@
 /*
 
-  + Arcade display
+  ARCADE DISPLAY
+  v0.2.0
 
 */
 
-var root = window;
-root.ArcadeDisplay = (function() {
+window.ArcadeDisplay = (function() {
   var __bind = function(fn, me) {
     return function() { return fn.apply(me, arguments); };
   };
@@ -13,10 +13,10 @@ root.ArcadeDisplay = (function() {
   /**************************************
    *  Default settings
    */
-  AD.prototype.options = {
-    default_color : "#1d1d1d",
-    led_height : 5,
-    led_width : 5
+  AD.prototype.settings = {
+    default_color: "#e4e4e4",
+    led_height: 5,
+    led_width: 5
   };
 
 
@@ -25,7 +25,7 @@ root.ArcadeDisplay = (function() {
    *  Various
    */
   AD.prototype.animation_array = [[]];
-  AD.prototype.state = { current_anim_idx : 0 };
+  AD.prototype.state = { current_animation_idx: 0 };
 
   // canvas,
   // context,
@@ -39,7 +39,7 @@ root.ArcadeDisplay = (function() {
   /**************************************
    *  Constructor
    */
-  function AD(canvas, options) {
+  function AD(canvas, settings) {
     var frame_rate;
 
     // check
@@ -48,15 +48,15 @@ root.ArcadeDisplay = (function() {
       return;
     }
 
-    // options
-    options = options || {};
+    // settings
+    settings = settings || {};
 
-    if (options.animation_array) {
-      this.animation_array = options.animation_array;
-      delete options.animation_array;
+    if (settings.animation_array) {
+      this.animation_array = settings.animation_array;
+      delete settings.animation_array;
     }
 
-    _.extend(this.options, options);
+    this.settings = _.extend({}, AD.prototype.settings, settings);
 
     // bind
     this.bind_to_self("anim_loop");
@@ -70,7 +70,7 @@ root.ArcadeDisplay = (function() {
     this.state.delay = 1000 * (1 / frame_rate);
 
     // render if needed
-    if (options.start_immediately) this.play();
+    if (settings.start_immediately) this.play();
   };
 
 
@@ -97,22 +97,22 @@ root.ArcadeDisplay = (function() {
 
     // amount of leds
     amount_of_leds = {
-      horizontal  : Math.floor(this.canvas.width  / this.options.led_width),
-      vertical    : Math.floor(this.canvas.height / this.options.led_height)
+      horizontal  : Math.ceil(this.canvas.width  / this.options.led_width),
+      vertical    : Math.ceil(this.canvas.height / this.options.led_height)
     };
 
     // check if the amount is even
-    // if not, reduce by one
-    if (amount_of_leds.horizontal % 2 === 0) --amount_of_leds.horizontal;
-    if (amount_of_leds.vertical   % 2 === 0) --amount_of_leds.vertical;
+    // if not, add one
+    if (amount_of_leds.horizontal % 2 === 0) ++amount_of_leds.horizontal;
+    if (amount_of_leds.vertical   % 2 === 0) ++amount_of_leds.vertical;
 
     // smaller variable names
     h = amount_of_leds.horizontal;
     v = amount_of_leds.vertical;
 
     // determine margins (on the outside)
-    this.margin_x = (this.canvas.width - (h * this.options.led_width)) / 2,
-    this.margin_y = (this.canvas.height - (v * this.options.led_height)) / 2;
+    this.margin_x = Math.floor((this.canvas.width - (h * this.options.led_width)) / 2),
+    this.margin_y = Math.floor((this.canvas.height - (v * this.options.led_height)) / 2);
 
     // this object
     this.state.amount_of_leds = amount_of_leds;
@@ -199,7 +199,7 @@ root.ArcadeDisplay = (function() {
     // led glow
     if (color !== this.options.default_color) {
       var radial_gradient = c.createRadialGradient(x, y, 0, x, y, radius * 5);
-      radial_gradient.addColorStop(0, this.hex_to_rgb(color, .11));
+      radial_gradient.addColorStop(0, this.hex_to_rgb(color, .0275));
       radial_gradient.addColorStop(1, this.hex_to_rgb(color, 0));
 
       c.fillStyle = radial_gradient;
@@ -280,15 +280,15 @@ root.ArcadeDisplay = (function() {
     }, this.state.delay);
 
     // set led array
-    led_array = this.animation_array[this.state.current_anim_idx];
+    led_array = this.get_current_led_array();
 
     // render
     this.render(true, led_array);
 
     // next led array index
     if (this.animation_array.length > 1) {
-      if (this.state.current_anim_idx < this.animation_array.length - 1) ++this.state.current_anim_idx;
-      else this.state.current_anim_idx = 0;
+      if (this.state.current_animation_idx < this.animation_array.length - 1) ++this.state.current_animation_idx;
+      else this.state.current_animation_idx = 0;
     }
   },
 
@@ -365,6 +365,11 @@ root.ArcadeDisplay = (function() {
   };
 
 
+  AD.prototype.get_current_led_array = function() {
+    return this.animation_array[this.state.current_animation_idx];
+  };
+
+
   // requestAnimationFrame polyfill by Erik Möller
   // fixes from Paul Irish and Tino Zijdel
   (function() {
@@ -400,4 +405,4 @@ root.ArcadeDisplay = (function() {
    */
   return AD;
 
-}());
+})();

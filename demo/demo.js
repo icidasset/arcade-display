@@ -28,8 +28,10 @@
   setup = function() {
     arcade_display = new ArcadeDisplay(canvas, {
       animation_array: window.animation,
-      default_color: "#290523",
-      start_immediately: true
+      default_color: "#2d2d2d",
+      start_immediately: true,
+      led_height: 4,
+      led_width: 4
     });
   };
 
